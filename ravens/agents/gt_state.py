@@ -36,16 +36,8 @@ class GtStateAgent:
     self.name = name
     self.task = task
 
-    if self.task in ['aligning', 'palletizing', 'packing']:
-      self.use_box_dimensions = True
-    else:
-      self.use_box_dimensions = False
-
-    if self.task in ['sorting']:
-      self.use_colors = True
-    else:
-      self.use_colors = False
-
+    self.use_box_dimensions = self.task in ['aligning', 'palletizing', 'packing']
+    self.use_colors = self.task in ['sorting']
     self.total_iter = 0
     self.camera_config = cameras.RealSenseD415.CONFIG
 
@@ -94,7 +86,7 @@ class GtStateAgent:
                             object_quat_wxyz[3], object_quat_wxyz[0])
       object_position = t_worldaug_object[0:3, 3]
 
-    object_xy = object_position[0:2]
+    object_xy = object_position[:2]
     object_theta = -np.float32(
         utils.quatXYZW_to_eulerXYZ(object_quat_xyzw)
         [2]) / self.theta_scale
@@ -160,9 +152,7 @@ class GtStateAgent:
     obs_vector = self.info_to_gt_obs(info)
 
     obs_dim = obs_vector.shape[0]
-    act_dim = 6
-    if self.six_dof:
-      act_dim = 9
+    act_dim = 9 if self.six_dof else 6
     self.model = MlpModel(
         self.batch_size, obs_dim, act_dim, 'relu', self.use_mdn, dropout=0.1)
 
@@ -176,9 +166,9 @@ class GtStateAgent:
 
     sampled_gt_obs = np.array(sampled_gt_obs)
 
-    obs_train_parameters = dict()
-    obs_train_parameters['mean'] = sampled_gt_obs.mean(axis=(0)).astype(
-        np.float32)
+    obs_train_parameters = {
+        'mean': sampled_gt_obs.mean(axis=(0)).astype(np.float32)
+    }
     obs_train_parameters['std'] = sampled_gt_obs.std(axis=(0)).astype(
         np.float32)
     self.model.set_normalization_parameters(obs_train_parameters)
@@ -338,7 +328,7 @@ class GtStateAgent:
     #     (0, 0, -gt_obs[2] * self.theta_scale))
 
     # just go exactly to objects, predicted
-    p0_position = np.hstack((prediction[0:2], 0.02))
+    p0_position = np.hstack((prediction[:2], 0.02))
     p0_rotation = utils.eulerXYZ_to_quatXYZW(
         (0, 0, -prediction[2] * self.theta_scale))
     p1_position = np.hstack((prediction[3:5], 0.02))
@@ -347,11 +337,11 @@ class GtStateAgent:
 
     # Select task-specific motion primitive.
     act['primitive'] = 'pick_place'
-    if self.task == 'sweeping':
-      act['primitive'] = 'sweep'
-    elif self.task == 'pushing':
+    if self.task == 'pushing':
       act['primitive'] = 'push'
 
+    elif self.task == 'sweeping':
+      act['primitive'] = 'sweep'
     params = {
         'pose0': (np.asarray(p0_position), np.asarray(p0_rotation)),
         'pose1': (np.asarray(p1_position), np.asarray(p1_rotation))
@@ -405,7 +395,7 @@ class GtState6DAgent(GtStateAgent):
 
     prediction = prediction[0]  # unbatch
 
-    p0_position = np.hstack((prediction[0:2], 0.02))
+    p0_position = np.hstack((prediction[:2], 0.02))
     p0_rotation = utils.eulerXYZ_to_quatXYZW(
         (0, 0, -prediction[2] * self.theta_scale))
 

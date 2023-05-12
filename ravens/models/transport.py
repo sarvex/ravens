@@ -45,7 +45,7 @@ class Transport:
     self.padding[:2, :] = self.pad_size
 
     in_shape = np.array(in_shape)
-    in_shape[0:2] += self.pad_size * 2
+    in_shape[:2] += self.pad_size * 2
     in_shape = tuple(in_shape)
 
     # Crop before network (default for Transporters in CoRL submission).

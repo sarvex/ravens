@@ -47,19 +47,19 @@ def identity_block(input_tensor,
   """
   filters1, filters2, filters3 = filters
   batchnorm_axis = 3
-  conv_name_base = 'res' + str(stage) + block + '_branch'
-  bn_name_base = 'bn' + str(stage) + block + '_branch'
+  conv_name_base = f'res{str(stage)}{block}_branch'
+  bn_name_base = f'bn{str(stage)}{block}_branch'
 
   x = tf.keras.layers.Conv2D(
-      filters1, (1, 1),
+      filters1,
+      (1, 1),
       dilation_rate=(1, 1),
       kernel_initializer='glorot_uniform',
-      name=conv_name_base + '2a')(
-          input_tensor)
+      name=f'{conv_name_base}2a',
+  )(input_tensor)
   if include_batchnorm:
-    x = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=bn_name_base + '2a')(
-            x)
+    x = tf.keras.layers.BatchNormalization(axis=batchnorm_axis,
+                                           name=f'{bn_name_base}2a')(x)
   x = tf.keras.layers.ReLU()(x)
 
   x = tf.keras.layers.Conv2D(
@@ -68,24 +68,23 @@ def identity_block(input_tensor,
       dilation_rate=(1, 1),
       padding='same',
       kernel_initializer='glorot_uniform',
-      name=conv_name_base + '2b')(
-          x)
+      name=f'{conv_name_base}2b',
+  )(x)
   if include_batchnorm:
-    x = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=bn_name_base + '2b')(
-            x)
+    x = tf.keras.layers.BatchNormalization(axis=batchnorm_axis,
+                                           name=f'{bn_name_base}2b')(x)
   x = tf.keras.layers.ReLU()(x)
 
   x = tf.keras.layers.Conv2D(
-      filters3, (1, 1),
+      filters3,
+      (1, 1),
       dilation_rate=(1, 1),
       kernel_initializer='glorot_uniform',
-      name=conv_name_base + '2c')(
-          x)
+      name=f'{conv_name_base}2c',
+  )(x)
   if include_batchnorm:
-    x = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=bn_name_base + '2c')(
-            x)
+    x = tf.keras.layers.BatchNormalization(axis=batchnorm_axis,
+                                           name=f'{bn_name_base}2c')(x)
 
   x = tf.keras.layers.add([x, input_tensor])
 
@@ -124,20 +123,20 @@ def conv_block(input_tensor,
   """
   filters1, filters2, filters3 = filters
   batchnorm_axis = 3
-  conv_name_base = 'res' + str(stage) + block + '_branch'
-  bn_name_base = 'bn' + str(stage) + block + '_branch'
+  conv_name_base = f'res{str(stage)}{block}_branch'
+  bn_name_base = f'bn{str(stage)}{block}_branch'
 
   x = tf.keras.layers.Conv2D(
-      filters1, (1, 1),
+      filters1,
+      (1, 1),
       strides=strides,
       dilation_rate=(1, 1),
       kernel_initializer='glorot_uniform',
-      name=conv_name_base + '2a')(
-          input_tensor)
+      name=f'{conv_name_base}2a',
+  )(input_tensor)
   if include_batchnorm:
-    x = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=bn_name_base + '2a')(
-            x)
+    x = tf.keras.layers.BatchNormalization(axis=batchnorm_axis,
+                                           name=f'{bn_name_base}2a')(x)
   x = tf.keras.layers.ReLU()(x)
 
   x = tf.keras.layers.Conv2D(
@@ -146,36 +145,35 @@ def conv_block(input_tensor,
       padding='same',
       dilation_rate=(1, 1),
       kernel_initializer='glorot_uniform',
-      name=conv_name_base + '2b')(
-          x)
+      name=f'{conv_name_base}2b',
+  )(x)
   if include_batchnorm:
-    x = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=bn_name_base + '2b')(
-            x)
+    x = tf.keras.layers.BatchNormalization(axis=batchnorm_axis,
+                                           name=f'{bn_name_base}2b')(x)
   x = tf.keras.layers.ReLU()(x)
 
   x = tf.keras.layers.Conv2D(
-      filters3, (1, 1),
+      filters3,
+      (1, 1),
       kernel_initializer='glorot_uniform',
       dilation_rate=(1, 1),
-      name=conv_name_base + '2c')(
-          x)
+      name=f'{conv_name_base}2c',
+  )(x)
   if include_batchnorm:
-    x = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=bn_name_base + '2c')(
-            x)
+    x = tf.keras.layers.BatchNormalization(axis=batchnorm_axis,
+                                           name=f'{bn_name_base}2c')(x)
 
   shortcut = tf.keras.layers.Conv2D(
-      filters3, (1, 1),
+      filters3,
+      (1, 1),
       strides=strides,
       dilation_rate=(1, 1),
       kernel_initializer='glorot_uniform',
-      name=conv_name_base + '1')(
-          input_tensor)
+      name=f'{conv_name_base}1',
+  )(input_tensor)
   if include_batchnorm:
     shortcut = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=bn_name_base + '1')(
-            shortcut)
+        axis=batchnorm_axis, name=f'{bn_name_base}1')(shortcut)
 
   x = tf.keras.layers.add([x, shortcut])
   if activation:
@@ -195,83 +193,105 @@ def ResNet43_8s(input_shape,  # pylint: disable=invalid-name
   input_data = tf.keras.layers.Input(shape=input_shape)
 
   x = tf.keras.layers.Conv2D(
-      64, (3, 3),
+      64,
+      (3, 3),
       strides=(1, 1),
       padding='same',
       kernel_initializer='glorot_uniform',
-      name=prefix + 'conv1')(
-          input_data)
+      name=f'{prefix}conv1',
+  )(input_data)
   if include_batchnorm:
-    x = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=prefix + 'bn_conv1')(
-            x)
+    x = tf.keras.layers.BatchNormalization(axis=batchnorm_axis,
+                                           name=f'{prefix}bn_conv1')(x)
   x = tf.keras.layers.ReLU()(x)
 
   if cutoff_early:
     x = conv_block(
         x,
-        5, [64, 64, output_dim],
+        5,
+        [64, 64, output_dim],
         stage=2,
-        block=prefix + 'a',
+        block=f'{prefix}a',
         strides=(1, 1),
-        include_batchnorm=include_batchnorm)
+        include_batchnorm=include_batchnorm,
+    )
     x = identity_block(
         x,
-        5, [64, 64, output_dim],
+        5,
+        [64, 64, output_dim],
         stage=2,
-        block=prefix + 'b',
-        include_batchnorm=include_batchnorm)
+        block=f'{prefix}b',
+        include_batchnorm=include_batchnorm,
+    )
     return input_data, x
 
-  x = conv_block(
-      x, 3, [64, 64, 64], stage=2, block=prefix + 'a', strides=(1, 1))
-  x = identity_block(x, 3, [64, 64, 64], stage=2, block=prefix + 'b')
+  x = conv_block(x, 3, [64, 64, 64], stage=2, block=f'{prefix}a', strides=(1, 1))
+  x = identity_block(x, 3, [64, 64, 64], stage=2, block=f'{prefix}b')
 
-  x = conv_block(
-      x, 3, [128, 128, 128], stage=3, block=prefix + 'a', strides=(2, 2))
-  x = identity_block(x, 3, [128, 128, 128], stage=3, block=prefix + 'b')
+  x = conv_block(x,
+                 3, [128, 128, 128],
+                 stage=3,
+                 block=f'{prefix}a',
+                 strides=(2, 2))
+  x = identity_block(x, 3, [128, 128, 128], stage=3, block=f'{prefix}b')
 
-  x = conv_block(
-      x, 3, [256, 256, 256], stage=4, block=prefix + 'a', strides=(2, 2))
-  x = identity_block(x, 3, [256, 256, 256], stage=4, block=prefix + 'b')
+  x = conv_block(x,
+                 3, [256, 256, 256],
+                 stage=4,
+                 block=f'{prefix}a',
+                 strides=(2, 2))
+  x = identity_block(x, 3, [256, 256, 256], stage=4, block=f'{prefix}b')
 
-  x = conv_block(
-      x, 3, [512, 512, 512], stage=5, block=prefix + 'a', strides=(2, 2))
-  x = identity_block(x, 3, [512, 512, 512], stage=5, block=prefix + 'b')
+  x = conv_block(x,
+                 3, [512, 512, 512],
+                 stage=5,
+                 block=f'{prefix}a',
+                 strides=(2, 2))
+  x = identity_block(x, 3, [512, 512, 512], stage=5, block=f'{prefix}b')
 
-  x = conv_block(
-      x, 3, [256, 256, 256], stage=6, block=prefix + 'a', strides=(1, 1))
-  x = identity_block(x, 3, [256, 256, 256], stage=6, block=prefix + 'b')
+  x = conv_block(x,
+                 3, [256, 256, 256],
+                 stage=6,
+                 block=f'{prefix}a',
+                 strides=(1, 1))
+  x = identity_block(x, 3, [256, 256, 256], stage=6, block=f'{prefix}b')
 
-  x = tf.keras.layers.UpSampling2D(
-      size=(2, 2), interpolation='bilinear', name=prefix + 'upsample_1')(
-          x)
+  x = tf.keras.layers.UpSampling2D(size=(2, 2),
+                                   interpolation='bilinear',
+                                   name=f'{prefix}upsample_1')(x)
 
-  x = conv_block(
-      x, 3, [128, 128, 128], stage=7, block=prefix + 'a', strides=(1, 1))
-  x = identity_block(x, 3, [128, 128, 128], stage=7, block=prefix + 'b')
+  x = conv_block(x,
+                 3, [128, 128, 128],
+                 stage=7,
+                 block=f'{prefix}a',
+                 strides=(1, 1))
+  x = identity_block(x, 3, [128, 128, 128], stage=7, block=f'{prefix}b')
 
-  x = tf.keras.layers.UpSampling2D(
-      size=(2, 2), interpolation='bilinear', name=prefix + 'upsample_2')(
-          x)
+  x = tf.keras.layers.UpSampling2D(size=(2, 2),
+                                   interpolation='bilinear',
+                                   name=f'{prefix}upsample_2')(x)
 
-  x = conv_block(
-      x, 3, [64, 64, 64], stage=8, block=prefix + 'a', strides=(1, 1))
-  x = identity_block(x, 3, [64, 64, 64], stage=8, block=prefix + 'b')
+  x = conv_block(x, 3, [64, 64, 64], stage=8, block=f'{prefix}a', strides=(1, 1))
+  x = identity_block(x, 3, [64, 64, 64], stage=8, block=f'{prefix}b')
 
-  x = tf.keras.layers.UpSampling2D(
-      size=(2, 2), interpolation='bilinear', name=prefix + 'upsample_3')(
-          x)
+  x = tf.keras.layers.UpSampling2D(size=(2, 2),
+                                   interpolation='bilinear',
+                                   name=f'{prefix}upsample_3')(x)
 
   x = conv_block(
       x,
-      3, [16, 16, output_dim],
+      3,
+      [16, 16, output_dim],
       stage=9,
-      block=prefix + 'a',
+      block=f'{prefix}a',
       strides=(1, 1),
-      activation=False)
-  output = identity_block(
-      x, 3, [16, 16, output_dim], stage=9, block=prefix + 'b', activation=False)
+      activation=False,
+  )
+  output = identity_block(x,
+                          3, [16, 16, output_dim],
+                          stage=9,
+                          block=f'{prefix}b',
+                          activation=False)
 
   return input_data, output
 
@@ -288,66 +308,71 @@ def ResNet36_4s(input_shape,  # pylint: disable=invalid-name
   input_data = tf.keras.layers.Input(shape=input_shape)
 
   x = tf.keras.layers.Conv2D(
-      64, (3, 3),
+      64,
+      (3, 3),
       strides=(1, 1),
       padding='same',
       kernel_initializer='glorot_uniform',
-      name=prefix + 'conv1')(
-          input_data)
+      name=f'{prefix}conv1',
+  )(input_data)
   if include_batchnorm:
-    x = tf.keras.layers.BatchNormalization(
-        axis=batchnorm_axis, name=prefix + 'bn_conv1')(
-            x)
+    x = tf.keras.layers.BatchNormalization(axis=batchnorm_axis,
+                                           name=f'{prefix}bn_conv1')(x)
   x = tf.keras.layers.ReLU()(x)
 
   if cutoff_early:
     x = conv_block(
         x,
-        5, [64, 64, output_dim],
+        5,
+        [64, 64, output_dim],
         stage=2,
-        block=prefix + 'a',
+        block=f'{prefix}a',
         strides=(1, 1),
-        include_batchnorm=include_batchnorm)
+        include_batchnorm=include_batchnorm,
+    )
     x = identity_block(
         x,
-        5, [64, 64, output_dim],
+        5,
+        [64, 64, output_dim],
         stage=2,
-        block=prefix + 'b',
-        include_batchnorm=include_batchnorm)
+        block=f'{prefix}b',
+        include_batchnorm=include_batchnorm,
+    )
     return input_data, x
 
-  x = conv_block(
-      x, 3, [64, 64, 64], stage=2, block=prefix + 'a', strides=(1, 1))
-  x = identity_block(x, 3, [64, 64, 64], stage=2, block=prefix + 'b')
+  x = conv_block(x, 3, [64, 64, 64], stage=2, block=f'{prefix}a', strides=(1, 1))
+  x = identity_block(x, 3, [64, 64, 64], stage=2, block=f'{prefix}b')
 
-  x = conv_block(
-      x, 3, [64, 64, 64], stage=3, block=prefix + 'a', strides=(2, 2))
-  x = identity_block(x, 3, [64, 64, 64], stage=3, block=prefix + 'b')
+  x = conv_block(x, 3, [64, 64, 64], stage=3, block=f'{prefix}a', strides=(2, 2))
+  x = identity_block(x, 3, [64, 64, 64], stage=3, block=f'{prefix}b')
 
-  x = conv_block(
-      x, 3, [64, 64, 64], stage=4, block=prefix + 'a', strides=(2, 2))
-  x = identity_block(x, 3, [64, 64, 64], stage=4, block=prefix + 'b')
+  x = conv_block(x, 3, [64, 64, 64], stage=4, block=f'{prefix}a', strides=(2, 2))
+  x = identity_block(x, 3, [64, 64, 64], stage=4, block=f'{prefix}b')
 
-  x = tf.keras.layers.UpSampling2D(
-      size=(2, 2), interpolation='bilinear', name=prefix + 'upsample_2')(
-          x)
+  x = tf.keras.layers.UpSampling2D(size=(2, 2),
+                                   interpolation='bilinear',
+                                   name=f'{prefix}upsample_2')(x)
 
-  x = conv_block(
-      x, 3, [64, 64, 64], stage=8, block=prefix + 'a', strides=(1, 1))
-  x = identity_block(x, 3, [64, 64, 64], stage=8, block=prefix + 'b')
+  x = conv_block(x, 3, [64, 64, 64], stage=8, block=f'{prefix}a', strides=(1, 1))
+  x = identity_block(x, 3, [64, 64, 64], stage=8, block=f'{prefix}b')
 
-  x = tf.keras.layers.UpSampling2D(
-      size=(2, 2), interpolation='bilinear', name=prefix + 'upsample_3')(
-          x)
+  x = tf.keras.layers.UpSampling2D(size=(2, 2),
+                                   interpolation='bilinear',
+                                   name=f'{prefix}upsample_3')(x)
 
   x = conv_block(
       x,
-      3, [16, 16, output_dim],
+      3,
+      [16, 16, output_dim],
       stage=9,
-      block=prefix + 'a',
+      block=f'{prefix}a',
       strides=(1, 1),
-      activation=False)
-  output = identity_block(
-      x, 3, [16, 16, output_dim], stage=9, block=prefix + 'b', activation=False)
+      activation=False,
+  )
+  output = identity_block(x,
+                          3, [16, 16, output_dim],
+                          stage=9,
+                          block=f'{prefix}b',
+                          activation=False)
 
   return input_data, output

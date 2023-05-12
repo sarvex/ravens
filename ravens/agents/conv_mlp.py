@@ -78,7 +78,7 @@ class ConvMlpAgent:
                             object_quat_wxyz[3], object_quat_wxyz[0])
       object_position = t_worldaug_object[0:3, 3]
 
-    object_xy = object_position[0:2]
+    object_xy = object_position[:2]
     object_theta = -np.float32(
         utils.quatXYZW_to_eulerXYZ(object_quat_xyzw)
         [2]) / self.theta_scale
@@ -234,7 +234,7 @@ class ConvMlpAgent:
 
     prediction = prediction[0]
 
-    p0_position = np.hstack((prediction[0:2], 0.02))
+    p0_position = np.hstack((prediction[:2], 0.02))
     p1_position = np.hstack((prediction[3:5], 0.02))
 
     p0_rotation = utils.eulerXYZ_to_quatXYZW(

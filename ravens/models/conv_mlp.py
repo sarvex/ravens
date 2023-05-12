@@ -52,10 +52,7 @@ def compute_spatial_soft_argmax(x, batch_size, H=149, W=69, C=64):  # pylint: di
   softmax = tf.expand_dims(softmax, -1)
   # Convert image coords to shape [H, W, 1, 2]
   image_coords = tf.expand_dims(image_coords, 2)
-  # Multiply (with broadcasting) and reduce over image dimensions to get the
-  # result of shape [B, C, 2].
-  spatial_soft_argmax = tf.reduce_sum(softmax * image_coords, axis=[1, 2])
-  return spatial_soft_argmax
+  return tf.reduce_sum(softmax * image_coords, axis=[1, 2])
 
 
 class ConvMLP(tf.keras.Model):

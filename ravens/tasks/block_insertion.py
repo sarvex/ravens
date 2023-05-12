@@ -112,9 +112,7 @@ class BlockInsertionNoFixture(BlockInsertion):
   def add_fixture(self, env):
     """Add target pose to place block."""
     size = (0.1, 0.1, 0.04)
-    # urdf = 'insertion/fixture.urdf'
-    pose = self.get_random_pose(env, size)
-    return pose
+    return self.get_random_pose(env, size)
 
   # def reset(self, env, last_info=None):
   #   self.num_steps = 1

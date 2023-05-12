@@ -64,9 +64,9 @@ class GtState2StepAgent(GtStateAgent):
 
     sampled_gt_obs = np.array(sampled_gt_obs)
 
-    obs_train_parameters = dict()
-    obs_train_parameters['mean'] = sampled_gt_obs.mean(axis=(0)).astype(
-        np.float32)
+    obs_train_parameters = {
+        'mean': sampled_gt_obs.mean(axis=(0)).astype(np.float32)
+    }
     obs_train_parameters['std'] = sampled_gt_obs.std(axis=(0)).astype(
         np.float32)
     self.pick_model.set_normalization_parameters(obs_train_parameters)
@@ -89,7 +89,7 @@ class GtState2StepAgent(GtStateAgent):
 
     sampled_gt_obs = np.array(sampled_gt_obs)
 
-    obs_train_parameters = dict()
+    obs_train_parameters = {}
     obs_train_parameters['mean'] = sampled_gt_obs.mean(axis=(0)).astype(
         np.float32)
     obs_train_parameters['std'] = sampled_gt_obs.std(axis=(0)).astype(
@@ -192,7 +192,7 @@ class GtState2StepAgent(GtStateAgent):
     #     (0, 0, -gt_obs[2]*self.theta_scale))
 
     # just go exactly to objects, predicted
-    p0_position = np.hstack((prediction[0:2], 0.02))
+    p0_position = np.hstack((prediction[:2], 0.02))
     p0_rotation = utils.eulerXYZ_to_quatXYZW(
         (0, 0, -prediction[2] * self.theta_scale))
     p1_position = np.hstack((prediction[3:5], 0.02))
@@ -201,11 +201,11 @@ class GtState2StepAgent(GtStateAgent):
 
     # Select task-specific motion primitive.
     act['primitive'] = 'pick_place'
-    if self.task == 'sweeping':
-      act['primitive'] = 'sweep'
-    elif self.task == 'pushing':
+    if self.task == 'pushing':
       act['primitive'] = 'push'
 
+    elif self.task == 'sweeping':
+      act['primitive'] = 'sweep'
     params = {
         'pose0': (np.asarray(p0_position), np.asarray(p0_rotation)),
         'pose1': (np.asarray(p1_position), np.asarray(p1_rotation))
@@ -273,9 +273,9 @@ class GtState3Step6DAgent(GtState6DAgent):
 
     sampled_gt_obs = np.array(sampled_gt_obs)
 
-    obs_train_parameters = dict()
-    obs_train_parameters['mean'] = sampled_gt_obs.mean(axis=(0)).astype(
-        np.float32)
+    obs_train_parameters = {
+        'mean': sampled_gt_obs.mean(axis=(0)).astype(np.float32)
+    }
     obs_train_parameters['std'] = sampled_gt_obs.std(axis=(0)).astype(
         np.float32)
     self.pick_model.set_normalization_parameters(obs_train_parameters)
@@ -298,7 +298,7 @@ class GtState3Step6DAgent(GtState6DAgent):
 
     sampled_gt_obs = np.array(sampled_gt_obs)
 
-    obs_train_parameters = dict()
+    obs_train_parameters = {}
     obs_train_parameters['mean'] = sampled_gt_obs.mean(axis=(0)).astype(
         np.float32)
     obs_train_parameters['std'] = sampled_gt_obs.std(axis=(0)).astype(
@@ -323,7 +323,7 @@ class GtState3Step6DAgent(GtState6DAgent):
 
     sampled_gt_obs = np.array(sampled_gt_obs)
 
-    obs_train_parameters = dict()
+    obs_train_parameters = {}
     obs_train_parameters['mean'] = sampled_gt_obs.mean(axis=(0)).astype(
         np.float32)
     obs_train_parameters['std'] = sampled_gt_obs.std(axis=(0)).astype(
@@ -433,11 +433,10 @@ class GtState3Step6DAgent(GtState6DAgent):
       place_rpz_prediction = place_rpz_prediction[:, 0, :]
     place_rpz_prediction = place_rpz_prediction[0]
 
-    p0_position = np.hstack((pick_prediction[0:2], 0.02))
+    p0_position = np.hstack((pick_prediction[:2], 0.02))
     p0_rotation = utils.eulerXYZ_to_quatXYZW((0, 0, 0))
 
-    p1_position = np.hstack(
-        (place_se2_prediction[0:2], place_rpz_prediction[2]))
+    p1_position = np.hstack((place_se2_prediction[:2], place_rpz_prediction[2]))
     p1_rotation = utils.eulerXYZ_to_quatXYZW(
         (place_rpz_prediction[0] * self.theta_scale,
          place_rpz_prediction[1] * self.theta_scale,

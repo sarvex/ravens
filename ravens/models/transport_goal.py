@@ -43,7 +43,7 @@ class TransportGoal:
     self.padding[:2, :] = self.pad_size
 
     input_shape = np.array(input_shape)
-    input_shape[0:2] += self.pad_size * 2
+    input_shape[:2] += self.pad_size * 2
     input_shape = tuple(input_shape)
 
     # Output dimension (i.e., number of channels) of 3.

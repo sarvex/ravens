@@ -89,8 +89,7 @@ def get_pointcloud(depth, intrinsics):
   px, py = np.meshgrid(xlin, ylin)
   px = (px - intrinsics[0, 2]) * (depth / intrinsics[0, 0])
   py = (py - intrinsics[1, 2]) * (depth / intrinsics[1, 1])
-  points = np.float32([px, py, depth]).transpose(1, 2, 0)
-  return points
+  return np.float32([px, py, depth]).transpose(1, 2, 0)
 
 
 def transform_pointcloud(points, transform):
@@ -134,10 +133,7 @@ def pix_to_xyz(pixel, height, bounds, pixel_size, skip_height=False):
   u, v = pixel
   x = bounds[0, 0] + v * pixel_size
   y = bounds[1, 0] + u * pixel_size
-  if not skip_height:
-    z = bounds[2, 0] + height[u, v]
-  else:
-    z = 0.0
+  z = bounds[2, 0] + height[u, v] if not skip_height else 0.0
   return (x, y, z)
 
 
@@ -174,8 +170,7 @@ def unproject_vectorized(uv_coordinates, depth_values,
   x = points_undistorted[:, 0] * depth_values
   y = points_undistorted[:, 1] * depth_values
 
-  xyz = np.vstack((x, y, depth_values)).T
-  return xyz
+  return np.vstack((x, y, depth_values)).T
 
 
 def unproject_depth_vectorized(im_depth, depth_dist,
@@ -260,8 +255,7 @@ def eulerXYZ_to_quatXYZW(rotation):  # pylint: disable=invalid-name
   euler_zxy = (rotation[2], rotation[0], rotation[1])
   quaternion_wxyz = euler.euler2quat(*euler_zxy, axes='szxy')
   q = quaternion_wxyz
-  quaternion_xyzw = (q[1], q[2], q[3], q[0])
-  return quaternion_xyzw
+  return q[1], q[2], q[3], q[0]
 
 
 def quatXYZW_to_eulerXYZ(quaternion_xyzw):  # pylint: disable=invalid-name
@@ -279,8 +273,7 @@ def quatXYZW_to_eulerXYZ(quaternion_xyzw):  # pylint: disable=invalid-name
   q = quaternion_xyzw
   quaternion_wxyz = np.array([q[3], q[0], q[1], q[2]])
   euler_zxy = euler.quat2euler(quaternion_wxyz, axes='szxy')
-  euler_xyz = (euler_zxy[1], euler_zxy[2], euler_zxy[0])
-  return euler_xyz
+  return euler_zxy[1], euler_zxy[2], euler_zxy[0]
 
 
 def apply_transform(transform_to_from, points_from):
@@ -477,15 +470,15 @@ def perturb(input_image, pixels, set_theta_zero=False):
 # Plot colors (Tableau palette).
 COLORS = {
     'blue': [078.0 / 255.0, 121.0 / 255.0, 167.0 / 255.0],
-    'red': [255.0 / 255.0, 087.0 / 255.0, 089.0 / 255.0],
+    'red': [1.0, 087.0 / 255.0, 089.0 / 255.0],
     'green': [089.0 / 255.0, 169.0 / 255.0, 079.0 / 255.0],
     'orange': [242.0 / 255.0, 142.0 / 255.0, 043.0 / 255.0],
     'yellow': [237.0 / 255.0, 201.0 / 255.0, 072.0 / 255.0],
     'purple': [176.0 / 255.0, 122.0 / 255.0, 161.0 / 255.0],
-    'pink': [255.0 / 255.0, 157.0 / 255.0, 167.0 / 255.0],
+    'pink': [1.0, 157.0 / 255.0, 167.0 / 255.0],
     'cyan': [118.0 / 255.0, 183.0 / 255.0, 178.0 / 255.0],
     'brown': [156.0 / 255.0, 117.0 / 255.0, 095.0 / 255.0],
-    'gray': [186.0 / 255.0, 176.0 / 255.0, 172.0 / 255.0]
+    'gray': [186.0 / 255.0, 176.0 / 255.0, 172.0 / 255.0],
 }
 
 
@@ -527,9 +520,7 @@ def plot(fname,  # pylint: disable=dangerous-default-value
   matplotlib.rcParams['pdf.fonttype'] = 42
   matplotlib.rcParams['ps.fonttype'] = 42
 
-  # Draw data.
-  color_iter = 0
-  for name, (x, y, std) in data.items():
+  for color_iter, (name, (x, y, std)) in enumerate(data.items()):
     del name
     x, y, std = np.float32(x), np.float32(y), np.float32(std)
     upper = np.clip(y + std, ylim[0], ylim[1])
@@ -538,8 +529,6 @@ def plot(fname,  # pylint: disable=dangerous-default-value
     if show_std:
       plt.fill_between(x, upper, lower, color=color, linewidth=0, alpha=0.3)
     plt.plot(x, y, color=color, linewidth=2, marker='o', alpha=1.)
-    color_iter += 1
-
   if xticks:
     plt.xticks(ticks=range(len(xticks)), labels=xticks, fontsize=14)
   else:
@@ -607,7 +596,7 @@ def meshcat_visualize(vis, obs, act, info):
     quaternion_wxyz = np.asarray(
         [pose[1][3], pose[1][0], pose[1][1], pose[1][2]])
     pick_transform[0:3, 0:3] = mtf.quaternion_matrix(quaternion_wxyz)[0:3, 0:3]
-    label = 'obj_' + str(key)
+    label = f'obj_{str(key)}'
     make_frame(vis, label, h=0.05, radius=0.0012, o=1.0)
     vis[label].set_transform(pick_transform)
 
@@ -633,5 +622,5 @@ def meshcat_visualize(vis, obs, act, info):
 
     colors = obs['color'][cam_index].reshape(-1, 3).T / 255.0
 
-    vis['pointclouds/' + str(cam_index)].set_object(
+    vis[f'pointclouds/{str(cam_index)}'].set_object(
         g.PointCloud(position=verts, color=colors))

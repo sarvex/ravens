@@ -84,8 +84,7 @@ class Matching:
     logits = tfa_image.transform(logits, rvecs, interpolation='NEAREST')
     c0 = self.padding[:2, 0]
     c1 = c0 + input_image.shape[:2]
-    output = logits[:, c0[0]:c1[0], c0[1]:c1[1], :]
-    return output
+    return logits[:, c0[0]:c1[0], c0[1]:c1[1], :]
 
   def train(self, input_image, p, q, theta):
     """Train function."""

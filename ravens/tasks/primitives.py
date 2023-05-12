@@ -61,10 +61,7 @@ class PickPlace():
     # Activate end effector, move up, and check picking success.
     ee.activate()
     timeout |= movep(postpick_pose, self.speed)
-    pick_success = ee.check_grasp()
-
-    # Execute placing primitive if pick is successful.
-    if pick_success:
+    if pick_success := ee.check_grasp():
       preplace_to_place = ((0, 0, self.height), (0, 0, 0, 1))
       postplace_to_place = ((0, 0, 0.32), (0, 0, 0, 1))
       preplace_pose = utils.multiply(place_pose, preplace_to_place)
@@ -78,7 +75,6 @@ class PickPlace():
       ee.release()
       timeout |= movep(postplace_pose)
 
-    # Move to prepick pose if pick is not successful.
     else:
       ee.release()
       timeout |= movep(prepick_pose)

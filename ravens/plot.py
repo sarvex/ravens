@@ -45,23 +45,20 @@ def main(unused_argv):
     if name in fname and '.pkl' in fname:
       n_steps = int(fname[(fname.rfind('-') + 1):-4])
       data = pickle.load(open(fname, 'rb'))
-      rewards = []
-      for reward, _ in data:
-        rewards.append(reward)
+      rewards = [reward for reward, _ in data]
       score = np.mean(rewards)
       std = np.std(rewards)
       print(f'  {n_steps} steps:\t{score:.1f}%\t± {std:.1f}%')
       curve.append((n_steps, score, std))
 
-  # Plot results over training steps.
-  title = f'{FLAGS.agent} on {FLAGS.task} w/ {FLAGS.n_demos} demos'
-  ylabel = 'Testing Task Success (%)'
-  xlabel = '# of Training Steps'
   if FLAGS.disp:
-    logs = {}
     curve = np.array(curve)
-    logs[name] = (curve[:, 0], curve[:, 1], curve[:, 2])
+    # Plot results over training steps.
+    title = f'{FLAGS.agent} on {FLAGS.task} w/ {FLAGS.n_demos} demos'
+    logs = {name: (curve[:, 0], curve[:, 1], curve[:, 2])}
     fname = os.path.join(path, f'{name}-plot.png')
+    ylabel = 'Testing Task Success (%)'
+    xlabel = '# of Training Steps'
     utils.plot(fname, title, ylabel, xlabel, data=logs, ylim=[0, 1])
     print(f'Done. Plot image saved to: {fname}')
 

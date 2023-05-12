@@ -94,5 +94,5 @@ class ManipulatingRope(Task):
     self.goals.append((objects, matches, targets,
                        False, False, 'pose', None, 1))
 
-    for i in range(480):
+    for _ in range(480):
       p.stepSimulation()

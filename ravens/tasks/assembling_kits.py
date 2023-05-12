@@ -47,11 +47,10 @@ class AssemblingKits(Task):
     n_objects = 5
     if self.mode == 'train':
       obj_shapes = np.random.choice(self.train_set, n_objects)
+    elif self.homogeneous:
+      obj_shapes = [np.random.choice(self.test_set)] * n_objects
     else:
-      if self.homogeneous:
-        obj_shapes = [np.random.choice(self.test_set)] * n_objects
-      else:
-        obj_shapes = np.random.choice(self.test_set, n_objects)
+      obj_shapes = np.random.choice(self.test_set, n_objects)
 
     colors = [
         utils.COLORS['purple'], utils.COLORS['blue'], utils.COLORS['green'],

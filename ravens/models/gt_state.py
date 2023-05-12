@@ -35,11 +35,7 @@ class MlpModel(tf.keras.Model):
     self.normalize_input = True
 
     self.use_sinusoid = use_sinusoid
-    if self.use_sinusoid:
-      k = 3
-    else:
-      k = 1
-
+    k = 3 if self.use_sinusoid else 1
     self.fc1 = layers.Dense(
         128,
         input_shape=(batch_size, d_obs * k),

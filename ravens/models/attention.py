@@ -42,11 +42,7 @@ class Attention:
 
     # Initialize fully convolutional Residual Network with 43 layers and
     # 8-stride (3 2x2 max pools and 3 2x bilinear upsampling)
-    if lite:
-      d_in, d_out = ResNet36_4s(in_shape, 1)
-    else:
-      d_in, d_out = ResNet43_8s(in_shape, 1)
-
+    d_in, d_out = ResNet36_4s(in_shape, 1) if lite else ResNet43_8s(in_shape, 1)
     self.model = tf.keras.models.Model(inputs=[d_in], outputs=[d_out])
     self.optim = tf.keras.optimizers.Adam(learning_rate=1e-4)
     self.metric = tf.keras.metrics.Mean(name='loss_attention')

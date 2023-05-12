@@ -95,19 +95,16 @@ class Environment(gym.Env):
     # Start PyBullet.
     disp_option = p.DIRECT
     if disp:
-      disp_option = p.GUI
-      if shared_memory:
-        disp_option = p.SHARED_MEMORY
+      disp_option = p.SHARED_MEMORY if shared_memory else p.GUI
     client = p.connect(disp_option)
     file_io = p.loadPlugin('fileIOPlugin', physicsClientId=client)
     if file_io < 0:
       raise RuntimeError('pybullet: cannot load FileIO!')
-    if file_io >= 0:
-      p.executePluginCommand(
-          file_io,
-          textArgument=assets_root,
-          intArgs=[p.AddFileIOAction],
-          physicsClientId=client)
+    p.executePluginCommand(
+        file_io,
+        textArgument=assets_root,
+        intArgs=[p.AddFileIOAction],
+        physicsClientId=client)
 
     p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
     p.setPhysicsEngineParameter(enableFileCaching=0)
@@ -209,11 +206,8 @@ class Environment(gym.Env):
       (obs, reward, done, info) tuple containing MDP step data.
     """
     if action is not None:
-      timeout = self.task.primitive(self.movej, self.movep, self.ee, **action)
-
-      # Exit early if action times out. We still return an observation
-      # so that we don't break the Gym API contract.
-      if timeout:
+      if timeout := self.task.primitive(self.movej, self.movep, self.ee,
+                                        **action):
         obs = {'color': (), 'depth': ()}
         for config in self.agent_cams:
           color, depth, _ = self.render_camera(config)
@@ -422,8 +416,6 @@ class EnvironmentNoRotationsWithHeightmap(Environment):
     return super(EnvironmentNoRotationsWithHeightmap, self).step(action)
 
   def _get_obs(self):
-    obs = {}
-
     color_depth_obs = {'color': (), 'depth': ()}
     for config in self.agent_cams:
       color, depth, _ = self.render_camera(config)
@@ -431,5 +423,4 @@ class EnvironmentNoRotationsWithHeightmap(Environment):
       color_depth_obs['depth'] += (depth,)
     cmap, hmap = utils.get_fused_heightmap(color_depth_obs, self.agent_cams,
                                            self.task.bounds, pix_size=0.003125)
-    obs['heightmap'] = (cmap, hmap)
-    return obs
+    return {'heightmap': (cmap, hmap)}
